@@ -1,0 +1,4 @@
+com\ubitronix\uiem\execution\adapter\dlms\cosem\util\RegisterReadingMapper.class
+com\ubitronix\uiem\dlms\client\DlmsClient$1.class
+com\ubitronix\uiem\execution\adapter\dlms\cosem\util\ObisCodeMapper.class
+com\ubitronix\uiem\dlms\client\DlmsClient.class

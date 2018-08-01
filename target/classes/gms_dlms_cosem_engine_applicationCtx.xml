@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:condbean="http://ubitronix.com/uiem/common/spring/conditionalbean"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+						http://www.springframework.org/schema/context 
+						http://www.springframework.org/schema/context/spring-context-2.5.xsd
+						http://www.springframework.org/schema/tx
+	                    http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+	                    http://www.springframework.org/schema/aop
+	                    http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+	                    http://ubitronix.com/uiem/common/spring/conditionalbean
+					  	http://ubitronix.com/uiem/common/spring/conditionalbean/conditionalbean.xsd
+					  	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+	
+	<import resource="classpath:uiem_abstract_execution_engine_applicationCtx.xml" />
+	<import resource="classpath:uiem_messagelog_applicationCtx.xml" />
+	<import resource="gms_dlms_cosem_engine_executionsteps_applicationCtx.xml" />
+	<import resource="gms_dlms_cosem_engine_assemblers_applicationCtx.xml" />
+	
+	<bean class="com.ubitronix.uiem.execution.system.core.utils.AddToMapBean">
+		<property name="target" ref="metaInfoMap" />
+		<property name="addAll">
+			<util:map>
+				<entry>
+					<key>
+						<util:constant
+							static-field="com.ubitronix.uiem.constants.Constants$TaskMetaInfoDlmsCosem.READ_METER" />
+					</key>
+					<bean class="com.ubitronix.uiem.execution.system.core.TaskMetaInfo">
+            <!-- missing dispatcher property defaults to com.ubitronix.uiem.execution.system.core.NothingToDoDispatchTask -->
+            <!-- missing poller property defaults to got with default poller -->
+						<property name="resultManager" ref="synchronousResultManager"/>
+					</bean>
+				</entry>
+			</util:map>
+		</property>
+	</bean>
+
+	<bean id="addToCollection"
+		class="com.ubitronix.uiem.execution.system.core.utils.AddToCollectionBean">
+		<property name="target" ref="filterDescriptions" />
+		<property name="addAll">
+			<util:list>
+				<bean
+					class="com.ubitronix.uiem.persistence.common.aop.utils.FilterDescription">
+					<constructor-arg type="java.lang.Class" value="com.ubitronix.uiem.persistence.dao.CoreBOFactoryBuilder"/>
+					<constructor-arg>
+						<value>engineFilter</value>
+					</constructor-arg>
+					<constructor-arg>
+						<util:map>
+							<entry>
+								<key>
+									<value>engineID</value>
+								</key>
+								<value>f5aab48b5668403a822c9c9916f4bc92</value>
+							</entry>
+						</util:map>
+					</constructor-arg>
+				</bean>
+			</util:list>
+		</property>
+	</bean>
+</beans>

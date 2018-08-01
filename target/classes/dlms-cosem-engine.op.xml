@@ -1,0 +1,72 @@
+<OPFile xmlns="http://www.ubitronix.com/XMLOperator" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ubitronix.com/XMLOperator http://www.ubitronix.com/XMLOperator.xsd">
+	<import file="abstract-engine.op.xml" />
+
+	<Operators version="01" bundleId="Dlms-Cosem-Engine">
+		<OP xsi:type="NL" name="dlms.cosem.ass.ReadMeter"
+			class="com.ubitronix.uiem.execution.adapter.dlms.cosem.operators.ReadMeterBox$AssembleReadMeter" />
+		<OP xsi:type="NL" name="dlms.cosem.disass.ReadMeter"
+			class="com.ubitronix.uiem.execution.adapter.dlms.cosem.operators.ReadMeterBox$DisassembleReadMeter" />
+
+		<OP xsi:type="COP" name="dlms.cosem.assembly.ReadMeter">
+			<Variables>
+				<InVariables>
+					<Var name="VAR_TsaId" type="java.lang.String" />
+					<Var name="VAR_DeviceId" type="java.lang.String" />
+				</InVariables>
+				<InternalVariables>
+          <Var name="VAR_TaskId" type="java.lang.String" />
+          <Var name="VAR_TaskResult" type="java.lang.String" />
+				</InternalVariables>
+			</Variables>
+			<Transitions>
+				<Trans name="TR_Finished" />
+				<Trans name="TR_Error" />
+			</Transitions>
+			<SubOps initial="SUB_Ass">
+				<OPRef ref="dlms.cosem.ass.ReadMeter" id="SUB_Ass">
+					<Lit name="VAR_TimoutOffsetInMinutes">
+						<int>5</int>
+					</Lit>
+
+					<Var name="VAR_TsaId" bindTo="VAR_TsaId" />
+					<Var name="VAR_TechnicalDeviceId">
+						<Script>
+						import com.ubitronix.uiem.persistence.domain.bo.Device;
+						import com.ubitronix.uiem.persistence.dao.CoreBOFactoryBuilder;
+						
+						Device device = CoreBOFactoryBuilder.getInstance().getBOFactory().getBoByID(VAR_DeviceId, Device.class);
+						return device.getTechnicalId();
+						</Script>
+					</Var>
+          <Var name="VAR_CreatedTaskId" bindTo="VAR_TaskId" />
+
+					<Trans name="TR_Succeeded" bindTo="SUB_IntrTaskResult" sleep="true" />
+					<Trans name="TR_Error" bindTo="SUB_ErrorDisass" />
+					<Trans name="TR_UnexpectedError" bindTo="SUB_ErrorDisass" />
+				</OPRef>
+				<OPRef ref="ae.IntroduceTaskResult" id="SUB_IntrTaskResult"
+					bundleId="AbstractEngine" version="01">
+          <Var name="VAR_TaskId" bindTo="VAR_TaskId" />
+          <Var name="VAR_TaskResult" bindTo="VAR_TaskResult" />
+					<Trans name="TR_UnexpectedError" bindTo="SUB_ErrorDisass" />
+					<Trans name="TR_TaskNotSucceeded" bindTo="SUB_ErrorDisass" />
+					<Trans name="TR_Succeeded" bindTo="SUB_Disass" />
+				</OPRef>
+				<OPRef ref="ae.DefaultErrorDisassembler" id="SUB_ErrorDisass"
+					bundleId="AbstractEngine" version="01">
+					<Var name="VAR_TsaId" bindTo="VAR_TsaId" />
+					<Trans name="TR_Finished" bindTo="TR_Finished" />
+					<Trans name="TR_UnexpectedError" bindTo="TR_Error" />
+				</OPRef>
+				<OPRef ref="dlms.cosem.disass.ReadMeter" id="SUB_Disass">
+          <Var name="VAR_Input" bindTo="VAR_TaskResult" />
+					<Var name="VAR_TsaId" bindTo="VAR_TsaId" />
+					<Trans name="TR_Succeeded" bindTo="TR_Finished" />
+					<Trans name="TR_UnexpectedError" bindTo="SUB_ErrorDisass" />
+				</OPRef>
+			</SubOps>
+		</OP>
+	</Operators>
+
+</OPFile>
